@@ -1,7 +1,7 @@
 {
   "name": "exprt",
   "description": "Express routes generator",
-  "version": "0.1.0-SNAPSHOT",
+  "version": "0.1.1",
   "homepage": "https://github.com/xinthink/exprt",
   "author": {
     "name": "xinthink",
