@@ -28,7 +28,7 @@ describe 'express route generator', ->
 
   it 'scans filtered files under a dir', ->
     exprt app,
-      path: __dirname + '/rt_simple',
+      path: __dirname + '/rt_simple'
       fileFilter:
         include: /i/
         exclude: /^index\./
@@ -36,9 +36,10 @@ describe 'express route generator', ->
     app.get.callCount.should.eql 2  # 2 routes in login
     app.post.should.not.called
 
+
   it 'scans all files under a dir, with handler filter', ->
     exprt app,
-      path: __dirname + '/rt_simple',
+      path: __dirname + '/rt_simple'
       handlerFilter:
         include: /i/
         exclude: /^logout\./
@@ -49,7 +50,8 @@ describe 'express route generator', ->
 
   it 'registers routes with basic COC rules', ->
     exprt app,
-      path: __dirname + '/rt_coc',
+      path: __dirname + '/rt_coc'
+      fileFilter: exclude: /_cfg\./
 
     app.get.should.calledWith '/', sinon.match.func
 
@@ -62,3 +64,12 @@ describe 'express route generator', ->
 
     app.get.callCount.should.eql 5
     app.post.callCount.should.eql 1
+
+
+  it 'registers routes overriding conventions', ->
+    exprt app,
+      path: __dirname + '/rt_coc'
+      fileFilter: include: /_cfg\./
+
+    app.get.should.calledWith '/', sinon.match.func
+    app.get.should.calledWith '/welcome', sinon.match.func

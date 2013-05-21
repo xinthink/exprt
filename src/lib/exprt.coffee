@@ -49,13 +49,14 @@ registerRoutes = (app, baseDir, f, opts) ->
   # console.log "loading routes from #{fullPath}"
   routes = require fullPath
 
-  basePath = determinePath baseName
+  basePath = determineBasePath baseName, routes
   registerRoute app, basePath, name, fn, opts for name, fn of routes
 
 
 # convert a name into URL part
-determinePath = (name) ->
-  '/' + (('/' if name.match /^index(_.*)?$/) or name)
+determineBasePath = (name, routes) ->
+  routes.exprt?.basePath or
+    '/' + (('/' if name.match /^index(_.*)?$/) or name)
 
 
 # check and register a single handler
