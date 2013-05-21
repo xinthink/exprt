@@ -40,4 +40,5 @@ _(Nothing yet)_
 
 ## License
 Copyright (c) 2013 xinthink
-Licensed under the MIT license.
+
+Licensed under the [MIT license](https://github.com/xinthink/exprt/blob/master/LICENSE-MIT).
