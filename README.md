@@ -6,8 +6,16 @@ Express routes generator
 Install the module with: `npm install exprt`
 
 ```javascript
-var exprt = require('exprt');
-exprt.awesome(); // "awesome"
+var express = require('express')
+  , exprt   = require('exprt')
+  , path    = require('path');
+
+var app = express();
+
+// scan and register express routes
+exprt(app, {
+  path: path.join(__dirname, 'routes')
+});
 ```
 
 ## Documentation
@@ -23,5 +31,5 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 _(Nothing yet)_
 
 ## License
-Copyright (c) 2013 xinthink  
+Copyright (c) 2013 xinthink
 Licensed under the MIT license.
