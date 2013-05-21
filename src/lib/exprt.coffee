@@ -15,9 +15,12 @@ path   = require 'path'
 assert = require 'assert'
 
 
-#
-# app  -
-# opts -
+# Scan route definitions, and register them to Express app
+# app  - the Express app
+# opts - Options
+#   path: the dir under which route handlers can be found, required
+#   fileFilter: regexp filtering handler files, optional
+#   handlerFilter: regexp filtering handler functions, optional
 # void
 module.exports = (app, opts={}) ->
   assert opts.path, 'routes path is required'
@@ -29,6 +32,7 @@ module.exports = (app, opts={}) ->
     registerRoutes app, baseDir, f, opts if accepted
 
 
+# filtering file/handler name
 acceptsName = (name, filter) ->
   not filter or (->
     inc = filter.include or /.*/
@@ -37,27 +41,44 @@ acceptsName = (name, filter) ->
   )()
 
 
+# looks for routes defined in the given file
 registerRoutes = (app, baseDir, f, opts) ->
-  baseName = path.basename f, path.extname f  # url base path of these routes
-  file     = path.join baseDir, baseName
+  baseName = path.basename f, path.extname f
+  fullPath = path.join baseDir, baseName
 
-  console.log "loading routes from #{file}"
-  routes = require file
+  # console.log "loading routes from #{fullPath}"
+  routes = require fullPath
 
   basePath = determinePath baseName
   registerRoute app, basePath, name, fn, opts for name, fn of routes
 
 
+# convert a name into URL part
 determinePath = (name) ->
   '/' + (('/' if name.match /^index(_.*)?$/) or name)
 
 
+# check and register a single handler
 registerRoute = (app, basePath, name, fn, opts) ->
-  accepted = fn instanceof Function and acceptsName name, opts.ftFilter
-  if accepted
-    p = determinePath name
-    doRegisterRoute app, 'get', (path.join basePath, p), fn
+  accepted = fn instanceof Function and acceptsName name, opts.handlerFilter
+  doRegisterRoute app, basePath, name, fn if accepted
 
 
-doRegisterRoute = (app, method, rt, fn) -> app[method] rt, fn
+doRegisterRoute = (app, basePath, name, fn) ->
+  [rt, method] = determineRoute name
+  rt = path.join basePath, rt
+  console.log "route: #{method}, '#{rt}', #{name}"
+  app[method] rt, fn
 
+
+# find url part and http method of the given handler
+determineRoute = (name) ->
+  rt     = ''
+  method = 'get'
+
+  m = /^([^_]*)(?:_(\w*))?$/.exec name
+  if m
+    rt     = m[1]
+    method = m[2].toLowerCase() if m[2]?
+  rt = '' if rt is 'index'
+  [rt, method]
