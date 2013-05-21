@@ -1,6 +1,6 @@
 # exprt
 
-Express routes generator
+A extremely simple [Express](http://expressjs.com/) routes generator, which is non-intrusive, and [COC](http://en.wikipedia.org/wiki/Convention_over_configuration)-based.
 
 ## Getting Started
 Install the module with: `npm install exprt`
@@ -16,6 +16,14 @@ var app = express();
 exprt(app, {
   path: path.join(__dirname, 'routes')
 });
+```
+
+Write standard express route handlers, put them in `routes/index.js`
+
+```javascript
+exports.index = function(req, res) {
+  res.send('it works!');
+};
 ```
 
 ## Documentation
