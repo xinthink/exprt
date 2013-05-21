@@ -50,16 +50,16 @@ module.exports = (grunt)->
     simplemocha:
       all:
         src: [
-          'node_modules/should/lib/should.js'
-          'out/test/**/*.js'
+          'out/test/init.js',
+          'out/test/**/*_test.js'
         ]
         options:
-          globals: ['should']
+          # globals: ['should']
           timeout: 3000
           ignoreLeaks: false
           #grep: '**/*.js'
           ui: 'bdd'
-          reporter: 'tap'
+          reporter: 'spec'
     watch:
       gruntfile:
         files: '<%= coffeelint.gruntfile.src %>'
