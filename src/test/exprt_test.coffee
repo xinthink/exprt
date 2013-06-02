@@ -6,16 +6,19 @@ exprt = require '../lib/exprt.js'
 
 describe 'express route generator', ->
   app =
-    get:  (args...) ->
-    post: (args...) ->
+    get:   (args...) ->
+    post:  (args...) ->
+    param: (args...) ->
 
   beforeEach ->
     spy app, 'get'
     spy app, 'post'
+    spy app, 'param'
 
   afterEach ->
     app.get.restore()
     app.post.restore()
+    app.param.restore()
 
 
   it 'scans all files under a dir', ->
@@ -51,7 +54,7 @@ describe 'express route generator', ->
   it 'registers routes with basic COC rules', ->
     exprt app,
       path: __dirname + '/rt_coc'
-      fileFilter: exclude: /_cfg\./
+      fileFilter: exclude: /_\w+\./
 
     app.get.should.calledWith '/', sinon.match.func
 
@@ -69,7 +72,35 @@ describe 'express route generator', ->
   it 'registers routes overriding conventions', ->
     exprt app,
       path: __dirname + '/rt_coc'
-      fileFilter: include: /_cfg\./
+      fileFilter: include: /^home_cfg\./
 
+    # home_cfg
     app.get.should.calledWith '/', sinon.match.func
     app.get.should.calledWith '/welcome', sinon.match.func
+
+    # /user
+    app.get.should.calledWith '/user/list', sinon.match.func
+    app.post.should.calledWith '/user/remove/:id', sinon.match.func
+    app.param.should.calledWith 'id', sinon.match.regexp
+
+    app.get.callCount.should.eql 3
+    app.post.callCount.should.eql 1
+
+
+  it 'registers routes mixed conventions with configurations', ->
+    exprt app,
+      path: __dirname + '/rt_coc'
+      fileFilter: include: /^user_mixed\./
+
+    # user_mixed
+    app.get.should.calledWith '/user/list', sinon.match.func
+
+    app.get.should.calledWith '/user_mixed/show/:id', sinon.match.func
+    app.param.should.calledWith 'id', sinon.match.regexp
+
+    app.post.should.calledWith '/user_mixed/remove/:id', sinon.match.func
+    app.param.should.calledWith 'id', sinon.match.regexp
+
+    app.get.callCount.should.eql 2
+    app.post.callCount.should.eql 1
+

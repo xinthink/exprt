@@ -9,3 +9,5 @@ src/
 out/demo/
 out/test/
 out/vendor/
+
+/example/

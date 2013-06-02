@@ -14,6 +14,8 @@ fs     = require 'fs'
 path   = require 'path'
 assert = require 'assert'
 
+fns = require './common'
+
 
 # Scan route definitions, and register them to Express app
 # app  - the Express app
@@ -28,17 +30,8 @@ module.exports = (app, opts={}) ->
 
   (fs.readdirSync baseDir).forEach (f) ->
     # console.log 'scanning ' + f
-    accepted = acceptsName f, opts.fileFilter
+    accepted = fns.acceptsName f, opts.fileFilter
     registerRoutes app, baseDir, f, opts if accepted
-
-
-# filtering file/handler name
-acceptsName = (name, filter) ->
-  not filter or (->
-    inc = filter.include or /.*/
-    exc = filter.exclude or /\0/
-    (name.match inc) and not name.match exc
-  )()
 
 
 # looks for routes defined in the given file
@@ -61,19 +54,27 @@ determineBasePath = (name, routes) ->
 
 # check and register a single handler
 registerRoute = (app, basePath, name, fn, opts) ->
-  accepted = fn instanceof Function and acceptsName name, opts.handlerFilter
+  accepted = fn instanceof Function and fns.acceptsName name, opts.handlerFilter
   doRegisterRoute app, basePath, name, fn if accepted
 
 
 doRegisterRoute = (app, basePath, name, fn) ->
-  [rt, method] = determineRoute name
-  rt = path.join basePath, rt
-  console.log "route: #{method}, '#{rt}', #{name}"
-  app[method] rt, fn
+  rt = determineRoute app, basePath, name, fn
+  console.log "route: #{rt.method}, '#{rt.route}', #{name}"
+  app[rt.method] rt.route, fn
 
 
 # find url part and http method of the given handler
-determineRoute = (name) ->
+determineRoute = (app, basePath, name, fn) ->
+  convention = determineConventionalRoute basePath, name
+  configure  = getConfiguredRoute fn
+  processRoute app, fns.merge convention, configure  # override convention with configure
+
+
+getConfiguredRoute = (fn) -> fn.exprt or {}
+
+
+determineConventionalRoute = (basePath, name) ->
   rt     = ''
   method = 'get'
 
@@ -82,4 +83,17 @@ determineRoute = (name) ->
     rt     = m[1]
     method = m[2].toLowerCase() if m[2]?
   rt = '' if rt is 'index'
-  [rt, method]
+
+  route:  path.join basePath, rt
+  method: method
+
+
+processRoute = (app, rt) ->
+  processRouteParam app, rt, param, validator for param, validator of rt.routeParams if rt.routeParams?
+  rt
+
+
+processRouteParam = (app, rt, param, validator) ->
+  app.param param, validator
+  rt.route = path.join rt.route, ":#{param}"
+

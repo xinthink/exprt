@@ -2,7 +2,7 @@
 exports.index = (req, res) ->
   res.render 'login'
 
-exports.index_post = (req, res) ->
+exports.index_pOSt = (req, res) ->
   res.render 'login'
 
 exports.logout = (req, res) ->
