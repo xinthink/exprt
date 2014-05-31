@@ -101,6 +101,27 @@ describe 'express route generator', ->
     app.post.should.calledWith '/user_mixed/remove/:id', sinon.match.func
     app.param.should.calledWith 'id', sinon.match.regexp
 
-    app.get.callCount.should.eql 2
+    app.get.should.calledWith '/user_mixed/vars/:user/:item', sinon.match.func
+    app.param.should.not.calledWith 'user', sinon.match.any
+    app.param.should.not.calledWith 'item', sinon.match.any
+
+    # app.get.should.calledWith '/user_mixed/varMappings/:user', sinon.match.func
+    # app.param.should.calledWith 'user', sinon.match.func
+    # app.param.should.not.calledWith 'item', sinon.match.any
+
+    app.get.callCount.should.eql 3
     app.post.callCount.should.eql 1
 
+
+  it 'supports custom route parameter mappings', ->
+    exprt app,
+      path: __dirname + '/rt_coc'
+      fileFilter: include: /^user_map\./
+
+    # user_map
+    app.get.should.calledWith '/user_map/varMappings/:user/:item', sinon.match.func
+    app.param.should.calledWith 'user', sinon.match.func
+    app.param.should.not.calledWith 'item', sinon.match.any
+
+    app.get.callCount.should.eql 1
+    app.post.callCount.should.eql 0

@@ -89,11 +89,15 @@ determineConventionalRoute = (basePath, name) ->
 
 
 processRoute = (app, rt) ->
-  processRouteParam app, rt, param, validator for param, validator of rt.routeParams if rt.routeParams?
-  rt
+  return rt unless rt.routeParams
 
+  if typeof rt.routeParams is 'string' or rt.routeParams instanceof String
+    rt.route = path.join rt.route, ":#{rt.routeParams}"
+  else if rt.routeParams.length
+    rt.route = path.join rt.route, ":#{v}" for v in rt.routeParams
+  else
+    for name, callback of rt.routeParams
+      rt.route = path.join rt.route, ":#{name}" if name
+      app.param name, callback if name and callback
 
-processRouteParam = (app, rt, param, validator) ->
-  app.param param, validator
-  rt.route = path.join rt.route, ":#{param}"
-
+  return rt

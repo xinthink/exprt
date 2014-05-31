@@ -21,3 +21,9 @@ exports.remove.exprt =
   method: 'post'
   routeParams:
     id: /\d+/
+
+
+exports.vars = (req, res) ->
+  res.send 'Show item of user: ' + req.params.user + req.params.item
+
+exports.vars.exprt = routeParams: ['user', 'item']
